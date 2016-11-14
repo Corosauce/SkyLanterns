@@ -41,7 +41,9 @@ public class RenderSkyLantern extends Render<EntitySkyLantern>
     	
     	float scale = 0.25F;
     	GlStateManager.scale(scale, scale, scale);
+    	GlStateManager.disableLighting();
     	model.render(entity, partialTicks, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
+    	GlStateManager.enableLighting();
     	GlStateManager.popMatrix();
         super.doRender(entity, x, y, z, entityYaw, partialTicks);
     }
