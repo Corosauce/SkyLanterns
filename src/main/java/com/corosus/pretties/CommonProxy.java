@@ -14,7 +14,7 @@ public class CommonProxy
 
     public void init()
     {
-    	addEntity(EntitySkyLantern.class, "skyLantern", 0, 256, 5, true);
+    	addEntity(EntitySkyLantern2.class, "skyLantern", 0, 256, 1, true);
     }
     
     public void addBlock(Block parBlock, String unlocalizedName, String blockNameBase) {

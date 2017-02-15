@@ -2,6 +2,7 @@ package com.corosus.pretties;
 
 import com.corosus.pretties.client.entity.render.RenderSkyLantern;
 
+import com.corosus.pretties.client.entity.render.RenderSkyLantern2;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -25,7 +26,8 @@ public class ClientProxy extends CommonProxy
     {
     	super.init();
     	
-    	addEntityRender(EntitySkyLantern.class, new RenderSkyLantern(Minecraft.getMinecraft().getRenderManager()));
+    	//addEntityRender(EntitySkyLantern.class, new RenderSkyLantern(Minecraft.getMinecraft().getRenderManager()));
+        addEntityRender(EntitySkyLantern2.class, new RenderSkyLantern2(Minecraft.getMinecraft().getRenderManager()));
     }
     
     @Override
