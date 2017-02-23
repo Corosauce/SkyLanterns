@@ -23,7 +23,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 
 	public EntitySkyLantern2(World worldIn) {
 		super(worldIn);
-
+        this.setSize(1F, 1.0F);
 		//this.moveHelper = new EntitySkyLantern2.FlyingMoveHelper(this);
 
 		//setNoGravity
@@ -47,22 +47,35 @@ public class EntitySkyLantern2 extends EntityCreature {
 	public void onUpdate() {
 		super.onUpdate();
 
-		this.setSize(1F, 1.0F);
+		//this.setSize(1F, 1.0F);
 		//this.motionY = 0;
 		
 		Random rand = this.getEntityWorld().rand;
 		
 		this.motionY += rand.nextDouble() * 0.01D;
-		if (this.motionY > 0.15D) {
-			this.motionY = 0.15D;
+		if (this.motionY > 0.05D) {
+			this.motionY = 0.05D;
 		}
 		
 		double speedAdj = 0.005D;
 		if (!this.getEntityWorld().isRemote) {
-			this.motionX += rand.nextDouble() * speedAdj - rand.nextDouble() * speedAdj;
-			this.motionZ += rand.nextDouble() * speedAdj - rand.nextDouble() * speedAdj;
-			
-			if (this.motionX > 0.3D) {
+			/*this.motionX += rand.nextDouble() * speedAdj - rand.nextDouble() * speedAdj;
+			this.motionZ += rand.nextDouble() * speedAdj - rand.nextDouble() * speedAdj;*/
+
+			long time = (this.getEntityId() * 3) + worldObj.getTotalWorldTime() * 3;
+			float timeClampSpeed = (((time)) % 360) - 180;
+
+			float tiltMax = (float)Math.toRadians(timeClampSpeed);
+
+			float speed = 0.01F;
+
+			//System.out.println(Math.cos(tiltMax)/* * speed*/);
+			//System.out.println(timeClampSpeed);
+
+			this.motionX += -Math.cos(tiltMax) * speed;
+			this.motionZ += Math.sin(tiltMax) * speed;
+
+			/*if (this.motionX > 0.3D) {
 				this.motionX = 0.3D;
 			} else if (this.motionX < -0.3D) {
 				this.motionX = -0.3D;
@@ -72,7 +85,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 				this.motionZ = 0.3D;
 			} else if (this.motionZ < -0.3D) {
 				this.motionZ = -0.3D;
-			}
+			}*/
 		}
 		
 		this.moveEntity(this.motionX, this.motionY, this.motionZ);

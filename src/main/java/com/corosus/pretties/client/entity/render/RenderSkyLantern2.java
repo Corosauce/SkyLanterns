@@ -64,4 +64,9 @@ public class RenderSkyLantern2 extends RenderLiving<EntitySkyLantern2>
         GlStateManager.rotate(tiltCurY + rotateY, 0, 1, 0);
         GlStateManager.rotate(tiltCurZ, 0, 0, 1);
     }
+
+    @Override
+    protected void renderLeash(EntitySkyLantern2 entityLivingIn, double x, double y, double z, float entityYaw, float partialTicks) {
+        super.renderLeash(entityLivingIn, x, y - (entityLivingIn.height * 1.1D), z, entityYaw, partialTicks);
+    }
 }
