@@ -9,6 +9,7 @@ import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -46,6 +47,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 	public void onUpdate() {
 		super.onUpdate();
 
+		this.setSize(1F, 1.0F);
 		//this.motionY = 0;
 		
 		Random rand = this.getEntityWorld().rand;
@@ -78,6 +80,14 @@ public class EntitySkyLantern2 extends EntityCreature {
 		if (!this.getEntityWorld().isRemote) {
 			if (this.posY > 300) {
 				this.setDead();
+			}
+		} else {
+			if (worldObj.rand.nextInt(5) == 0) {
+				double d0 = posX;// + 0.5D;
+				double d1 = posY + 0.15D;
+				double d2 = posZ;// + 0.5D;
+				worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, 0.0D, 0.0D, 0.0D, new int[0]);
+				worldObj.spawnParticle(EnumParticleTypes.FLAME, d0, d1, d2, 0.0D, 0.0D, 0.0D, new int[0]);
 			}
 		}
 
@@ -175,7 +185,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 
 	@Override
 	public float getEyeHeight() {
-		return super.getEyeHeight();
+		return super.getEyeHeight() - 0.5F;
 	}
 
 	protected void updateLeashedState()

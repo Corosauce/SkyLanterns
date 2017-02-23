@@ -17,7 +17,7 @@ public class RenderSkyLantern2 extends RenderLiving<EntitySkyLantern2>
     /** instance of ModelBoat for rendering */
     //protected ModelBase model = new ModelPaperLanternPink();
     public static ResourceLocation TEXTURES = new ResourceLocation(Pretties.MODID + ":textures/entities/paperlanternpink.png");
-    private float scale = 0.4F;
+    private float scale = 0.2F;
 
     public RenderSkyLantern2(RenderManager renderManagerIn)
     {
@@ -40,6 +40,28 @@ public class RenderSkyLantern2 extends RenderLiving<EntitySkyLantern2>
     @Override
     protected void preRenderCallback(EntitySkyLantern2 entitylivingbaseIn, float partialTickTime)
     {
-        GlStateManager.scale(this.scale, this.scale, this.scale);
+        float scale = 0.25F;
+        GlStateManager.scale(scale, scale, scale);
+
+        long time = entitylivingbaseIn.worldObj.getTotalWorldTime();
+
+
+
+        long timeBase = time + (entitylivingbaseIn.getEntityId() * 10);
+        float rate = 5;
+
+        float tiltMax = (float)Math.sin(Math.toRadians(((timeBase) * 1F) % 360)) * 5F;
+
+        float tiltCurX = (float)Math.sin(Math.toRadians(((timeBase) * rate) % 360)) * tiltMax;
+        float tiltCurY = (float)Math.sin(Math.toRadians(((timeBase + 45) * rate) % 360)) * tiltMax;
+        float tiltCurZ = (float)Math.sin(Math.toRadians(((timeBase + 90) * rate) % 360)) * tiltMax;
+
+        float rotateY = (((float)timeBase * 0.1F) % 360);
+
+        //tiltCur = (float)Math.sin(Math.toRadians(90)) * tiltMax;
+
+        GlStateManager.rotate(tiltCurX, 1, 0, 0);
+        GlStateManager.rotate(tiltCurY + rotateY, 0, 1, 0);
+        GlStateManager.rotate(tiltCurZ, 0, 0, 1);
     }
 }
