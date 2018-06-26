@@ -3,6 +3,7 @@ package com.corosus.pretties;
 import java.util.Random;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MoverType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.event.terraingen.BiomeEvent.GetWaterColor;
@@ -50,7 +51,7 @@ public class EntitySkyLantern extends Entity {
 			}
 		}
 		
-		this.moveEntity(this.motionX, this.motionY, this.motionZ);
+		this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
 		
 		if (!this.getEntityWorld().isRemote) {
 			if (this.posY > 300) {
@@ -73,7 +74,7 @@ public class EntitySkyLantern extends Entity {
 	
 	@SideOnly(Side.CLIENT)
 	@Override
-    public int getBrightnessForRender(float partialTicks)
+    public int getBrightnessForRender()
     {
         return 15728880;
     }

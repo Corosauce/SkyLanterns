@@ -33,7 +33,7 @@ public class ClientProxy extends CommonProxy
         addEntityRender(EntitySkyLantern2.class, new RenderSkyLantern2(Minecraft.getMinecraft().getRenderManager()));
     }
     
-    @Override
+    /*@Override
     public void addBlock(Block parBlock, String unlocalizedName, String blockNameBase) {
     	super.addBlock(parBlock, unlocalizedName, blockNameBase);
     	
@@ -42,7 +42,7 @@ public class ClientProxy extends CommonProxy
     
     public void registerItem(Item item, int meta, ModelResourceLocation location) {
     	Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(item, meta, location);
-    }
+    }*/
     
     public static void addEntityRender(Class<? extends Entity> entityClass, Render render) {
 		RenderingRegistry.registerEntityRenderingHandler(entityClass, render);

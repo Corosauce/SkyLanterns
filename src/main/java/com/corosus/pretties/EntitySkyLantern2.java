@@ -2,6 +2,7 @@ package com.corosus.pretties;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.MoverType;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.entity.monster.EntityGhast;
@@ -27,7 +28,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 		//this.moveHelper = new EntitySkyLantern2.FlyingMoveHelper(this);
 
 		//setNoGravity
-		this.func_189654_d(true);
+		this.setNoGravity(true);
 	}
 
 	@Override
@@ -62,7 +63,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 			/*this.motionX += rand.nextDouble() * speedAdj - rand.nextDouble() * speedAdj;
 			this.motionZ += rand.nextDouble() * speedAdj - rand.nextDouble() * speedAdj;*/
 
-			long time = (this.getEntityId() * 3) + worldObj.getTotalWorldTime() * 3;
+			long time = (this.getEntityId() * 3) + world.getTotalWorldTime() * 3;
 			float timeClampSpeed = (((time)) % 360) - 180;
 
 			float tiltMax = (float)Math.toRadians(timeClampSpeed);
@@ -88,19 +89,19 @@ public class EntitySkyLantern2 extends EntityCreature {
 			}*/
 		}
 		
-		this.moveEntity(this.motionX, this.motionY, this.motionZ);
+		this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
 		
 		if (!this.getEntityWorld().isRemote) {
 			if (this.posY > 300) {
 				this.setDead();
 			}
 		} else {
-			if (worldObj.rand.nextInt(5) == 0) {
+			if (world.rand.nextInt(5) == 0) {
 				double d0 = posX;// + 0.5D;
 				double d1 = posY + 0.15D;
 				double d2 = posZ;// + 0.5D;
-				worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, 0.0D, 0.0D, 0.0D, new int[0]);
-				worldObj.spawnParticle(EnumParticleTypes.FLAME, d0, d1, d2, 0.0D, 0.0D, 0.0D, new int[0]);
+				world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, 0.0D, 0.0D, 0.0D, new int[0]);
+				world.spawnParticle(EnumParticleTypes.FLAME, d0, d1, d2, 0.0D, 0.0D, 0.0D, new int[0]);
 			}
 		}
 
@@ -119,7 +120,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 
 	@SideOnly(Side.CLIENT)
 	@Override
-	public int getBrightnessForRender(float partialTicks)
+	public int getBrightnessForRender()
 	{
 		return 15728880;
 	}
@@ -128,7 +129,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 	 * Gets how bright this entity is.
 	 */
 	@Override
-	public float getBrightness(float partialTicks)
+	public float getBrightness()
 	{
 		return 1.0F;
 	}
@@ -156,7 +157,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 				if (this.courseChangeCooldown-- <= 0)
 				{
 					this.courseChangeCooldown += this.parentEntity.getRNG().nextInt(5) + 2;
-					d3 = (double) MathHelper.sqrt_double(d3);
+					d3 = (double) MathHelper.sqrt(d3);
 
 					if (this.isNotColliding(this.posX, this.posY, this.posZ, d3))
 					{
@@ -186,7 +187,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 			{
 				axisalignedbb = axisalignedbb.offset(d0, d1, d2);
 
-				if (!this.parentEntity.worldObj.getCollisionBoxes(this.parentEntity, axisalignedbb).isEmpty())
+				if (!this.parentEntity.world.getCollisionBoxes(this.parentEntity, axisalignedbb).isEmpty())
 				{
 					return false;
 				}
@@ -205,7 +206,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 	{
 		super.updateLeashedState();
 
-		if (this.getLeashed() && this.getLeashedToEntity() != null && this.getLeashedToEntity().worldObj == this.worldObj)
+		if (this.getLeashed() && this.getLeashedToEntity() != null && this.getLeashedToEntity().world == this.world)
 		{
 			Entity entity = this.getLeashedToEntity();
 			this.setHomePosAndDistance(new BlockPos((int)entity.posX, (int)entity.posY, (int)entity.posZ), 5);

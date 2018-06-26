@@ -5,23 +5,19 @@ import com.corosus.pretties.EntitySkyLantern2;
 import com.corosus.pretties.Pretties;
 import com.corosus.pretties.client.entity.model.ModelPaperLanternPink;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.monster.EntityGiantZombie;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
-
-import java.util.Random;
 
 @SideOnly(Side.CLIENT)
 public class RenderSkyLantern2 extends RenderLiving<EntitySkyLantern2>
@@ -55,7 +51,7 @@ public class RenderSkyLantern2 extends RenderLiving<EntitySkyLantern2>
         float scale = 0.25F;
         GlStateManager.scale(scale, scale, scale);
 
-        long time = entitylivingbaseIn.worldObj.getTotalWorldTime();
+        long time = entitylivingbaseIn.world.getTotalWorldTime();
 
 
 
@@ -95,7 +91,7 @@ public class RenderSkyLantern2 extends RenderLiving<EntitySkyLantern2>
     }
 
     @Override
-    protected void rotateCorpse(EntitySkyLantern2 entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks) {
+    protected void applyRotations(EntitySkyLantern2 entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks) {
         //super.rotateCorpse(entityLiving, p_77043_2_, p_77043_3_, partialTicks);
 
         GlStateManager.rotate(180.0F - p_77043_3_, 0.0F, 1.0F, 0.0F);
@@ -103,7 +99,7 @@ public class RenderSkyLantern2 extends RenderLiving<EntitySkyLantern2>
         if (entityLiving.deathTime > 0)
         {
             float f = ((float)entityLiving.deathTime + partialTicks - 1.0F) / 20.0F * 1.6F;
-            f = MathHelper.sqrt_float(f);
+            f = MathHelper.sqrt(f);
 
             if (f > 1.0F)
             {
@@ -135,7 +131,7 @@ public class RenderSkyLantern2 extends RenderLiving<EntitySkyLantern2>
         int borderSize = 0;
 
         Tessellator tessellator = Tessellator.getInstance();
-        VertexBuffer worldrenderer = tessellator.getBuffer();
+        BufferBuilder worldrenderer = tessellator.getBuffer();
 
         //GlStateManager.disableFog();
 

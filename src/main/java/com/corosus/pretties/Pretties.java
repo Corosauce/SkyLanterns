@@ -28,8 +28,5 @@ public class Pretties
     public void init(FMLInitializationEvent event)
     {
     	proxy.init();
-    	
-    	
-    	MinecraftForge.EVENT_BUS.register(new EventHandlerForge());
     }
 }
