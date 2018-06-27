@@ -1,9 +1,9 @@
-package com.corosus.pretties.client.entity.render;
+package com.corosus.skylanterns.client.entity.render;
 
-import com.corosus.pretties.ClientProxy;
-import com.corosus.pretties.EntitySkyLantern2;
-import com.corosus.pretties.Pretties;
-import com.corosus.pretties.client.entity.model.ModelPaperLanternPink;
+import com.corosus.skylanterns.ClientProxy;
+import com.corosus.skylanterns.EntitySkyLantern2;
+import com.corosus.skylanterns.SkyLanterns;
+import com.corosus.skylanterns.client.entity.model.ModelPaperLanternPink;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -24,7 +24,7 @@ public class RenderSkyLantern2 extends RenderLiving<EntitySkyLantern2>
 {
     /** instance of ModelBoat for rendering */
     //protected ModelBase model = new ModelPaperLanternPink();
-    public static ResourceLocation TEXTURES = new ResourceLocation(Pretties.MODID + ":textures/entities/paperlanternpink.png");
+    public static ResourceLocation TEXTURES = new ResourceLocation(SkyLanterns.MODID + ":textures/entities/paperlanternpink.png");
     private float scale = 0.2F;
 
     public RenderSkyLantern2(RenderManager renderManagerIn)

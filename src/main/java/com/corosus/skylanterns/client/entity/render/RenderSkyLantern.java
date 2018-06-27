@@ -1,26 +1,23 @@
-package com.corosus.pretties.client.entity.render;
+package com.corosus.skylanterns.client.entity.render;
 
-import net.minecraft.client.model.IMultipassModel;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import com.corosus.pretties.EntitySkyLantern;
-import com.corosus.pretties.Pretties;
-import com.corosus.pretties.client.entity.model.ModelPaperLanternPink;
+import com.corosus.skylanterns.EntitySkyLantern;
+import com.corosus.skylanterns.SkyLanterns;
+import com.corosus.skylanterns.client.entity.model.ModelPaperLanternPink;
 
 @SideOnly(Side.CLIENT)
 public class RenderSkyLantern extends Render<EntitySkyLantern>
 {
     /** instance of ModelBoat for rendering */
     protected ModelBase model = new ModelPaperLanternPink();
-    public static ResourceLocation TEXTURES = new ResourceLocation(Pretties.MODID + ":textures/entities/paperlanternpink.png");
+    public static ResourceLocation TEXTURES = new ResourceLocation(SkyLanterns.MODID + ":textures/entities/paperlanternpink.png");
 
     public RenderSkyLantern(RenderManager renderManagerIn)
     {

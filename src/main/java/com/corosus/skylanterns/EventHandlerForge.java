@@ -1,4 +1,4 @@
-package com.corosus.pretties;
+package com.corosus.skylanterns;
 
 
 import net.minecraft.util.ResourceLocation;
@@ -17,7 +17,7 @@ public class EventHandlerForge {
 
         //optifine breaks (removes) forge added method setTextureEntry, dont use it
 
-        ClientProxy.radianLight = event.getMap().registerSprite(new ResourceLocation(Pretties.MODID + ":entities/radiant_light"));
+        ClientProxy.radianLight = event.getMap().registerSprite(new ResourceLocation(SkyLanterns.MODID + ":entities/radiant_light"));
 
     }
 	

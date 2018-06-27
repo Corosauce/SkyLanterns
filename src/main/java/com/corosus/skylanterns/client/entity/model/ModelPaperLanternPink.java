@@ -1,4 +1,4 @@
-package com.corosus.pretties.client.entity.model;
+package com.corosus.skylanterns.client.entity.model;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;

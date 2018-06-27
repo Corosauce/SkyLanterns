@@ -1,15 +1,13 @@
-package com.corosus.pretties;
+package com.corosus.skylanterns;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityMoveHelper;
-import net.minecraft.entity.monster.EntityGhast;
-import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.pathfinding.PathNavigateGround;
-import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -21,6 +19,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.Random;
 
 public class EntitySkyLantern2 extends EntityCreature {
+
+	public BlockPos posLight = new BlockPos(BlockPos.ORIGIN);
 
 	public EntitySkyLantern2(World worldIn) {
 		super(worldIn);
@@ -70,6 +70,14 @@ public class EntitySkyLantern2 extends EntityCreature {
 
 			float speed = 0.01F;
 
+			if (ticksExisted < 40) {
+				speed = 0.001F;
+			}
+
+			if (getLeashed()) {
+				speed = 0.001F;
+			}
+
 			//System.out.println(Math.cos(tiltMax)/* * speed*/);
 			//System.out.println(timeClampSpeed);
 
@@ -105,17 +113,39 @@ public class EntitySkyLantern2 extends EntityCreature {
 			}
 		}
 
+		if (!this.getEntityWorld().isRemote && world.getTotalWorldTime() % 10 == 0) {
+			double dist = getDistanceSq(posLight);
+			if (dist > 3) {
+				//remove old if needed
+				IBlockState state = world.getBlockState(posLight);
+				if (state.getBlock() == CommonProxy.blockAirLit) {
+					world.setBlockState(posLight, Blocks.AIR.getDefaultState());
+				}
+				//set new
+				posLight = getPosition();
+				if (world.isAirBlock(posLight)) {
+					world.setBlockState(posLight, CommonProxy.blockAirLit.getDefaultState());
+				}
+			}
+		}
+
 		this.fallDistance = 0;
 	}
 
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
+
+		posLight = new BlockPos(compound.getInteger("light_X"), compound.getInteger("light_Y"), compound.getInteger("light_Z"));
 	}
 
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
+
+		compound.setInteger("light_X", posLight.getX());
+		compound.setInteger("light_Y", posLight.getY());
+		compound.setInteger("light_Z", posLight.getZ());
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -212,7 +242,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 			this.setHomePosAndDistance(new BlockPos((int)entity.posX, (int)entity.posY, (int)entity.posZ), 5);
 			float f = this.getDistanceToEntity(entity);
 
-			if (f > 5F)
+			if (f > 3F)
 			{
 				double d0 = (entity.posX - this.posX) / (double)f;
 				double d1 = (entity.posY - this.posY) / (double)f;

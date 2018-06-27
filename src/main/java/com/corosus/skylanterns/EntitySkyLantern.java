@@ -1,4 +1,4 @@
-package com.corosus.pretties;
+package com.corosus.skylanterns;
 
 import java.util.Random;
 
@@ -6,7 +6,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraftforge.event.terraingen.BiomeEvent.GetWaterColor;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
