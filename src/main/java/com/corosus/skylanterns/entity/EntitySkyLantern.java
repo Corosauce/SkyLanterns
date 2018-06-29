@@ -1,13 +1,20 @@
-package com.corosus.skylanterns;
+package com.corosus.skylanterns.entity;
 
+import com.corosus.skylanterns.CommonProxy;
+import com.corosus.skylanterns.config.ConfigSkyLanterns;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityMoveHelper;
+import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -18,11 +25,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Random;
 
-public class EntitySkyLantern2 extends EntityCreature {
+public class EntitySkyLantern extends EntityCreature {
 
 	public BlockPos posLight = new BlockPos(BlockPos.ORIGIN);
 
-	public EntitySkyLantern2(World worldIn) {
+	//public EnumDyeColor color = EnumDyeColor.ORANGE;
+
+	public static final DataParameter<Integer> COLOR = EntityDataManager.<Integer>createKey(EntitySkyLantern.class, DataSerializers.VARINT);
+
+	public EntitySkyLantern(World worldIn) {
 		super(worldIn);
         this.setSize(1F, 1.0F);
 		//this.moveHelper = new EntitySkyLantern2.FlyingMoveHelper(this);
@@ -34,14 +45,19 @@ public class EntitySkyLantern2 extends EntityCreature {
 	@Override
 	protected void entityInit() {
 		super.entityInit();
-		
+
+		this.getDataManager().register(COLOR, Integer.valueOf(0));
+	}
+
+	public void setColor(EnumDyeColor color) {
+		this.getDataManager().set(COLOR, color.getMetadata());
 	}
 
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 
-		this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(2.0D);
+		this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0D);
 	}
 
 	@Override
@@ -52,11 +68,17 @@ public class EntitySkyLantern2 extends EntityCreature {
 		//this.motionY = 0;
 		
 		Random rand = this.getEntityWorld().rand;
-		
-		this.motionY += rand.nextDouble() * 0.01D;
-		if (this.motionY > 0.05D) {
-			this.motionY = 0.05D;
+
+		if (this.motionY < 0.05D) {
+			if (ticksExisted >= 40) {
+				this.motionY += rand.nextDouble() * 0.01D;
+			} else {
+				this.motionY += rand.nextDouble() * 0.005D;
+			}
 		}
+		/*if (this.motionY > 0.05D) {
+			this.motionY = 0.05D;
+		}*/
 		
 		double speedAdj = 0.005D;
 		if (!this.getEntityWorld().isRemote) {
@@ -71,7 +93,7 @@ public class EntitySkyLantern2 extends EntityCreature {
 			float speed = 0.01F;
 
 			if (ticksExisted < 40) {
-				speed = 0.001F;
+				speed = 0.006F;
 			}
 
 			if (getLeashed()) {
@@ -113,20 +135,35 @@ public class EntitySkyLantern2 extends EntityCreature {
 			}
 		}
 
-		if (!this.getEntityWorld().isRemote && world.getTotalWorldTime() % 10 == 0) {
-			double dist = getDistanceSq(posLight);
-			if (dist > 3) {
-				//remove old if needed
+		if (ConfigSkyLanterns.lightUpdateRate != -1) {
+			if (!this.getEntityWorld().isRemote && (ConfigSkyLanterns.lightUpdateRate <= 0 || world.getTotalWorldTime() % ConfigSkyLanterns.lightUpdateRate == 0)) {
+				double dist = getDistanceSq(posLight);
+				if (dist >= ConfigSkyLanterns.lightUpdateDistanceAccuracy) {
+					//remove old if needed
+					IBlockState state = world.getBlockState(posLight);
+					if (state.getBlock() == CommonProxy.blockAirLit) {
+						world.setBlockState(posLight, Blocks.AIR.getDefaultState());
+					}
+					//set new, setting light high in the sky is a lag fest, only allow it when directly above ground
+					posLight = getPosition();
+					if (world.isAirBlock(posLight) && world.getHeight(posLight).getY() + ConfigSkyLanterns.lightUpdateDistanceToGround > posY) {
+						world.setBlockState(posLight, CommonProxy.blockAirLit.getDefaultState());
+					}
+				}
+			}
+		} else {
+			//if they changed the config, make sure to remove old light
+			if (!posLight.equals(BlockPos.ORIGIN)) {
 				IBlockState state = world.getBlockState(posLight);
 				if (state.getBlock() == CommonProxy.blockAirLit) {
 					world.setBlockState(posLight, Blocks.AIR.getDefaultState());
 				}
-				//set new
-				posLight = getPosition();
-				if (world.isAirBlock(posLight)) {
-					world.setBlockState(posLight, CommonProxy.blockAirLit.getDefaultState());
-				}
+				posLight = BlockPos.ORIGIN;
 			}
+		}
+
+		if (!this.getEntityWorld().isRemote && world.getTotalWorldTime() % 20 == 0) {
+			this.heal(1);
 		}
 
 		this.fallDistance = 0;
@@ -137,6 +174,12 @@ public class EntitySkyLantern2 extends EntityCreature {
 		super.readEntityFromNBT(compound);
 
 		posLight = new BlockPos(compound.getInteger("light_X"), compound.getInteger("light_Y"), compound.getInteger("light_Z"));
+
+		this.getDataManager().set(COLOR, compound.getInteger("color"));
+
+		if (this.getDataManager().get(COLOR) == 0) {
+			this.getDataManager().set(COLOR, EnumDyeColor.ORANGE.getMetadata());
+		}
 	}
 
 	@Override
@@ -146,6 +189,8 @@ public class EntitySkyLantern2 extends EntityCreature {
 		compound.setInteger("light_X", posLight.getX());
 		compound.setInteger("light_Y", posLight.getY());
 		compound.setInteger("light_Z", posLight.getZ());
+
+		compound.setInteger("color", this.getDataManager().get(COLOR));
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -166,10 +211,10 @@ public class EntitySkyLantern2 extends EntityCreature {
 
 	static class FlyingMoveHelper extends EntityMoveHelper
 	{
-		private final EntitySkyLantern2 parentEntity;
+		private final EntitySkyLantern parentEntity;
 		private int courseChangeCooldown;
 
-		public FlyingMoveHelper(EntitySkyLantern2 ghast)
+		public FlyingMoveHelper(EntitySkyLantern ghast)
 		{
 			super(ghast);
 			this.parentEntity = ghast;

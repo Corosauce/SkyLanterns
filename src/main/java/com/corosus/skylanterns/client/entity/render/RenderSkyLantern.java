@@ -1,72 +1,38 @@
 package com.corosus.skylanterns.client.entity.render;
 
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
-import com.corosus.skylanterns.EntitySkyLantern;
+import com.corosus.skylanterns.ClientProxy;
+import com.corosus.skylanterns.entity.EntitySkyLantern;
 import com.corosus.skylanterns.SkyLanterns;
 import com.corosus.skylanterns.client.entity.model.ModelPaperLanternPink;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.RenderLiving;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.item.EnumDyeColor;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.opengl.GL11;
+
+import java.util.HashMap;
 
 @SideOnly(Side.CLIENT)
-public class RenderSkyLantern extends Render<EntitySkyLantern>
+public class RenderSkyLantern extends RenderLiving<EntitySkyLantern>
 {
-    /** instance of ModelBoat for rendering */
-    protected ModelBase model = new ModelPaperLanternPink();
-    public static ResourceLocation TEXTURES = new ResourceLocation(SkyLanterns.MODID + ":textures/entities/paperlanternpink.png");
+    public HashMap<Integer, ResourceLocation> TEXTURES = new HashMap<>();
 
     public RenderSkyLantern(RenderManager renderManagerIn)
     {
-        super(renderManagerIn);
-        this.shadowSize = 0.5F;
-    }
+        super(renderManagerIn, new ModelPaperLanternPink(), 0.5F);
 
-    /**
-     * Renders the desired {@code T} type Entity.
-     */
-    @Override
-    public void doRender(EntitySkyLantern entity, double x, double y, double z, float entityYaw, float partialTicks)
-    {
-    	GlStateManager.pushMatrix();
-    	this.setupTranslation(x, y, z);
-        this.setupRotation(entity, entityYaw, partialTicks);
-    	this.bindEntityTexture(entity);
-    	
-    	float scale = 0.25F;
-    	GlStateManager.scale(scale, scale, scale);
-    	GlStateManager.disableLighting();
-    	model.render(entity, partialTicks, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-    	GlStateManager.enableLighting();
-    	GlStateManager.popMatrix();
-        super.doRender(entity, x, y, z, entityYaw, partialTicks);
-    }
-    
-    public void setupTranslation(double p_188309_1_, double p_188309_3_, double p_188309_5_)
-    {
-        GlStateManager.translate((float)p_188309_1_, (float)p_188309_3_ + 0.375F, (float)p_188309_5_);
-    }
-    
-    public void setupRotation(EntitySkyLantern p_188311_1_, float p_188311_2_, float p_188311_3_)
-    {
-        GlStateManager.rotate(180.0F - p_188311_2_, 0.0F, 1.0F, 0.0F);
-        float f = 0;//(float)p_188311_1_.getTimeSinceHit() - p_188311_3_;
-        float f1 = 0;//p_188311_1_.getDamageTaken() - p_188311_3_;
-
-        if (f1 < 0.0F)
-        {
-            f1 = 0.0F;
-        }
-
-        if (f > 0.0F)
-        {
-            //GlStateManager.rotate(MathHelper.sin(f) * f * f1 / 10.0F * (float)p_188311_1_.getForwardDirection(), 1.0F, 0.0F, 0.0F);
-        }
-
-        //GlStateManager.scale(-1.0F, -1.0F, 1.0F);
+        TEXTURES.put(EnumDyeColor.ORANGE.getMetadata(), new ResourceLocation(SkyLanterns.MODID + ":textures/entities/sky_lantern_orange.png"));
+        TEXTURES.put(EnumDyeColor.PINK.getMetadata(), new ResourceLocation(SkyLanterns.MODID + ":textures/entities/sky_lantern_pink.png"));
     }
 
     /**
@@ -75,6 +41,165 @@ public class RenderSkyLantern extends Render<EntitySkyLantern>
     @Override
     protected ResourceLocation getEntityTexture(EntitySkyLantern entity)
     {
-        return TEXTURES;
+        return TEXTURES.get(entity.getDataManager().get(EntitySkyLantern.COLOR));
+    }
+
+    /**
+     * Allows the render to do state modifications necessary before the model is rendered.
+     */
+    @Override
+    protected void preRenderCallback(EntitySkyLantern entitylivingbaseIn, float partialTickTime)
+    {
+        float scale = 0.25F;
+        GlStateManager.scale(scale, scale, scale);
+
+        long time = entitylivingbaseIn.world.getTotalWorldTime();
+
+
+
+        long timeBase = time + (entitylivingbaseIn.getEntityId() * 10);
+        float rate = 5;
+
+        float tiltMax = (float)Math.sin(Math.toRadians(((timeBase) * 1F) % 360)) * 5F;
+
+        float tiltCurX = (float)Math.sin(Math.toRadians(((timeBase) * rate) % 360)) * tiltMax;
+        float tiltCurY = (float)Math.sin(Math.toRadians(((timeBase + 45) * rate) % 360)) * tiltMax;
+        float tiltCurZ = (float)Math.sin(Math.toRadians(((timeBase + 90) * rate) % 360)) * tiltMax;
+
+        float rotateY = (((float)timeBase * 0.1F) % 360);
+
+        //tiltCur = (float)Math.sin(Math.toRadians(90)) * tiltMax;
+
+        GlStateManager.rotate(tiltCurX, 1, 0, 0);
+        GlStateManager.rotate(tiltCurY + rotateY, 0, 1, 0);
+        GlStateManager.rotate(tiltCurZ, 0, 0, 1);
+    }
+
+    @Override
+    public void doRender(EntitySkyLantern entity, double x, double y, double z, float entityYaw, float partialTicks) {
+
+        //GlStateManager.disableLighting();
+
+        /*int i = 15728880;//entitylivingbaseIn.getBrightnessForRender(1);
+        int j = i % 65536;
+        int k = i / 65536;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);*/
+
+        super.doRender(entity, x, y, z, entityYaw, partialTicks);
+
+        //GlStateManager.enableLighting();
+
+        renderTexture(x, y + 0.435D, z, 32, 32, Minecraft.getMinecraft().getRenderManager().playerViewY, ClientProxy.radianLight);
+    }
+
+    @Override
+    protected void applyRotations(EntitySkyLantern entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks) {
+        //super.rotateCorpse(entityLiving, p_77043_2_, p_77043_3_, partialTicks);
+
+        GlStateManager.rotate(180.0F - p_77043_3_, 0.0F, 1.0F, 0.0F);
+
+        if (entityLiving.deathTime > 0)
+        {
+            float f = ((float)entityLiving.deathTime + partialTicks - 1.0F) / 20.0F * 1.6F;
+            f = MathHelper.sqrt(f);
+
+            if (f > 1.0F)
+            {
+                f = 1.0F;
+            }
+
+            GlStateManager.rotate(f * 700F/*this.getDeathMaxRotation(entityLiving)*/, 0.0F, 1.0F, 0.0F);
+        }
+    }
+
+    @Override
+    protected void renderLeash(EntitySkyLantern entityLivingIn, double x, double y, double z, float entityYaw, float partialTicks) {
+        super.renderLeash(entityLivingIn, x, y - (entityLivingIn.height * 1.1D), z, entityYaw, partialTicks);
+    }
+
+    public void renderTexture(double x, double y, double z, int width, int height, float angle, TextureAtlasSprite parIcon) {
+        float f6 = parIcon.getMinU();
+        float f7 = parIcon.getMaxU();
+        float f9 = parIcon.getMinV();
+        float f8 = parIcon.getMaxV();
+
+        float scale = 0.022F;
+        GlStateManager.pushMatrix();
+        GlStateManager.translate((float)x, (float)y, (float)z);
+        GL11.glNormal3f(0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(-angle, 0.0F, 1.0F, 0.0F);
+        GlStateManager.scale(-scale, -scale, -scale);
+
+        int borderSize = 0;
+
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder worldrenderer = tessellator.getBuffer();
+
+        //GlStateManager.disableFog();
+
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        GlStateManager.alphaFunc(516, 0.003921569F);
+
+        GlStateManager.disableLighting();
+
+        //Minecraft.getMinecraft().entityRenderer.enableLightmap();
+
+        /*int i = 15728880;
+        //i = (new Random()).nextInt(99999999);
+        int j = i >> 16 & 65535;
+        int k = i & 65535;*/
+
+        /*int i = 15728880;//entitylivingbaseIn.getBrightnessForRender(1);
+        int j = i % 65536;
+        int k = i / 65536;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);*/
+
+        this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        //worldrenderer.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
+
+        float r = 1F;
+        float g = 1F;
+        float b = 1F;
+
+        worldrenderer
+                .pos((double)(-width / 2 - borderSize), (double)(-borderSize), 0.0D)
+                .tex(f6, f9)
+                .color(r, g, b, 1.0F)
+                //.lightmap(j, k)
+                .endVertex();
+
+        worldrenderer
+                .pos((double)(-width / 2 - borderSize), (double)(height), 0.0D)
+                .tex(f6, f8)
+                .color(r, g, b, 1.0F)
+                //.lightmap(j, k)
+                .endVertex();
+
+        worldrenderer
+                .pos((double)(width / 2 + borderSize), (double)(height), 0.0D)
+                .tex(f7, f8)
+                .color(r, g, b, 1.0F)
+                //.lightmap(j, k)
+                .endVertex();
+
+        worldrenderer
+                .pos((double)(width / 2 + borderSize), (double)(-borderSize), 0.0D)
+                .tex(f7, f9)
+                .color(r, g, b, 1.0F)
+                //.lightmap(j, k)
+                .endVertex();
+
+        tessellator.draw();
+
+        GlStateManager.enableLighting();
+
+        GlStateManager.depthMask(true);
+        GlStateManager.disableBlend();
+        GlStateManager.alphaFunc(516, 0.1F);
+
+        GL11.glPopMatrix();
     }
 }

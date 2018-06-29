@@ -68,5 +68,6 @@
     <orderEntry type="library" name="Gradle: org.scala-lang.modules:scala-swing_2.11:1.0.1" level="project" />
     <orderEntry type="library" name="Gradle: commons-codec:commons-codec:1.10" level="project" />
     <orderEntry type="module" module-name="forgeSrc-1.12.1-14.22.0.2475-PROJECT(forge-1.12.1-CoroUtil)-sources" />
+    <orderEntry type="module" module-name="CoroUtil_1.12.x" />
   </component>
 </module>

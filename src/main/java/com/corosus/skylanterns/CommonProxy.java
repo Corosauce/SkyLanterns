@@ -1,9 +1,11 @@
 package com.corosus.skylanterns;
 
 import com.corosus.skylanterns.block.BlockLit;
+import com.corosus.skylanterns.entity.EntitySkyLantern;
 import com.corosus.skylanterns.item.ItemSkyLantern;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.ResourceLocation;
@@ -19,13 +21,18 @@ public class CommonProxy
 
     public static final String air_lit = "air_lit";
 
-    public static final String sky_lantern_item = "sky_lantern_item";
+    public static final String sky_lantern_item_orange = "sky_lantern_item_orange";
+
+    public static final String sky_lantern_item_pink = "sky_lantern_item_pink";
 
     @GameRegistry.ObjectHolder(SkyLanterns.MODID + ":" + air_lit)
     public static Block blockAirLit;
 
-    @GameRegistry.ObjectHolder(SkyLanterns.MODID + ":" + sky_lantern_item)
-    public static Item itemSkyLantern;
+    @GameRegistry.ObjectHolder(SkyLanterns.MODID + ":" + sky_lantern_item_orange)
+    public static Item itemSkyLanternOrange;
+
+    @GameRegistry.ObjectHolder(SkyLanterns.MODID + ":" + sky_lantern_item_pink)
+    public static Item itemSkyLanternPink;
 	
     public CommonProxy()
     {
@@ -34,7 +41,7 @@ public class CommonProxy
 
     public void init()
     {
-    	addEntity(EntitySkyLantern2.class, "sky_lantern", 0, 256, 1, true);
+    	addEntity(EntitySkyLantern.class, "sky_lantern", 0, 256, 3, true);
 
     }
 
@@ -45,7 +52,9 @@ public class CommonProxy
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        SkyLanterns.proxy.addItem(event, new ItemSkyLantern(), sky_lantern_item);
+        SkyLanterns.proxy.addItem(event, new ItemSkyLantern(EnumDyeColor.ORANGE), sky_lantern_item_orange);
+
+        SkyLanterns.proxy.addItem(event, new ItemSkyLantern(EnumDyeColor.PINK), sky_lantern_item_pink);
 
         SkyLanterns.proxy.addItemBlock(event, new ItemBlock(blockAirLit).setRegistryName(blockAirLit.getRegistryName()));
     }

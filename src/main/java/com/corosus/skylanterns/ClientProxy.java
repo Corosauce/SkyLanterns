@@ -1,6 +1,7 @@
 package com.corosus.skylanterns;
 
-import com.corosus.skylanterns.client.entity.render.RenderSkyLantern2;
+import com.corosus.skylanterns.client.entity.render.RenderSkyLantern;
+import com.corosus.skylanterns.entity.EntitySkyLantern;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.Render;
@@ -28,7 +29,7 @@ public class ClientProxy extends CommonProxy
     	super.init();
     	
     	//addEntityRender(EntitySkyLantern.class, new RenderSkyLantern(Minecraft.getMinecraft().getRenderManager()));
-        addEntityRender(EntitySkyLantern2.class, new RenderSkyLantern2(Minecraft.getMinecraft().getRenderManager()));
+        addEntityRender(EntitySkyLantern.class, new RenderSkyLantern(Minecraft.getMinecraft().getRenderManager()));
     }
     
     public static void addEntityRender(Class<? extends Entity> entityClass, Render render) {
@@ -46,6 +47,7 @@ public class ClientProxy extends CommonProxy
     public void addItemBlock(RegistryEvent.Register<Item> event, Item item) {
         super.addItemBlock(event, item);
 
-        ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
+        //dont want to add entry for lit_air
+        //ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
     }
 }
