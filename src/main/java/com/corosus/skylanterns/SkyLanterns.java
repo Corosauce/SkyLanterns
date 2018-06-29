@@ -1,11 +1,7 @@
 package com.corosus.skylanterns;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.corosus.skylanterns.config.ConfigSkyLanterns;
 import modconfig.ConfigMod;
-import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
