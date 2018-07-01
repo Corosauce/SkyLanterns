@@ -39,6 +39,7 @@ public class ItemSkyLantern extends Item {
                 EntitySkyLantern entity = new EntitySkyLantern(worldIn);
                 entity.setPosition(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ);
                 entity.setColor(color);
+                entity.onInitialSpawn(entity.world.getDifficultyForLocation(new BlockPos(entity)), null);
                 worldIn.spawnEntity(entity);
 
                 return EnumActionResult.SUCCESS;

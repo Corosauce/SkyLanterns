@@ -1,7 +1,9 @@
 package com.corosus.skylanterns.entity;
 
+import CoroUtil.entity.IWorldAccessHooks;
 import com.corosus.skylanterns.CommonProxy;
 import com.corosus.skylanterns.config.ConfigSkyLanterns;
+import net.minecraft.block.BlockFence;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.EntityMoveHelper;
@@ -18,27 +20,26 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.Random;
+import java.util.UUID;
 
-public class EntitySkyLantern extends EntityCreature {
+public class EntitySkyLantern extends EntityCreature implements IWorldAccessHooks {
 
 	public BlockPos posLight = new BlockPos(BlockPos.ORIGIN);
 
-	//public EnumDyeColor color = EnumDyeColor.ORANGE;
-
-	public static final DataParameter<Integer> COLOR = EntityDataManager.<Integer>createKey(EntitySkyLantern.class, DataSerializers.VARINT);
+	public static final DataParameter<Integer> COLOR = EntityDataManager.createKey(EntitySkyLantern.class, DataSerializers.VARINT);
 
 	public EntitySkyLantern(World worldIn) {
 		super(worldIn);
         this.setSize(1F, 1.0F);
-		//this.moveHelper = new EntitySkyLantern2.FlyingMoveHelper(this);
 
-		//setNoGravity
-		this.setNoGravity(true);
+        //CommandSummon is retarded and calls readFromNBT which undoes this, so just force set it elsewhere
+		//this.setNoGravity(true);
 	}
 
 	@Override
@@ -72,6 +73,9 @@ public class EntitySkyLantern extends EntityCreature {
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+
+		this.setNoGravity(true);
+		this.enablePersistence();
 		
 		Random rand = this.getEntityWorld().rand;
 
@@ -82,8 +86,7 @@ public class EntitySkyLantern extends EntityCreature {
 				this.motionY += rand.nextDouble() * 0.005D;
 			}
 		}
-		
-		double speedAdj = 0.005D;
+
 		if (!this.getEntityWorld().isRemote) {
 			long time = (this.getEntityId() * 3) + world.getTotalWorldTime() * 3;
 			float timeClampSpeed = (((time)) % 360) - 180;
@@ -100,27 +103,12 @@ public class EntitySkyLantern extends EntityCreature {
 				speed = 0.001F;
 			}
 
-			//System.out.println(Math.cos(tiltMax)/* * speed*/);
-			//System.out.println(timeClampSpeed);
-
 			this.motionX += -Math.cos(tiltMax) * speed;
 			this.motionZ += Math.sin(tiltMax) * speed;
-
-			/*if (this.motionX > 0.3D) {
-				this.motionX = 0.3D;
-			} else if (this.motionX < -0.3D) {
-				this.motionX = -0.3D;
-			}
-			
-			if (this.motionZ > 0.3D) {
-				this.motionZ = 0.3D;
-			} else if (this.motionZ < -0.3D) {
-				this.motionZ = -0.3D;
-			}*/
 		}
-		
-		this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-		
+
+		this.pushOutOfBlocks(this.posX, (this.getEntityBoundingBox().minY + this.getEntityBoundingBox().maxY) / 2.0D, this.posZ);
+
 		if (!this.getEntityWorld().isRemote) {
 			if (this.posY > 300) {
 				this.setDead();
@@ -138,12 +126,9 @@ public class EntitySkyLantern extends EntityCreature {
 		if (ConfigSkyLanterns.lightUpdateRate != -1) {
 			if (!this.getEntityWorld().isRemote && (ConfigSkyLanterns.lightUpdateRate <= 0 || world.getTotalWorldTime() % ConfigSkyLanterns.lightUpdateRate == 0)) {
 				double dist = getDistanceSq(posLight);
-				if (dist >= ConfigSkyLanterns.lightUpdateDistanceAccuracy) {
+				if (dist >= ConfigSkyLanterns.lightUpdateDistanceAccuracy || world.getBlockState(posLight).getBlock() != CommonProxy.blockAirLit) {
 					//remove old if needed
-					IBlockState state = world.getBlockState(posLight);
-					if (state.getBlock() == CommonProxy.blockAirLit) {
-						world.setBlockState(posLight, Blocks.AIR.getDefaultState());
-					}
+					clearCurrentLightBlock();
 					//set new, setting light high in the sky is a lag fest, only allow it when directly above ground
 					posLight = getPosition();
 					if (world.isAirBlock(posLight) && world.getHeight(posLight).getY() + ConfigSkyLanterns.lightUpdateDistanceToGround > posY) {
@@ -153,12 +138,8 @@ public class EntitySkyLantern extends EntityCreature {
 			}
 		} else {
 			//if they changed the config, make sure to remove old light
-			if (!posLight.equals(BlockPos.ORIGIN)) {
-				IBlockState state = world.getBlockState(posLight);
-				if (state.getBlock() == CommonProxy.blockAirLit) {
-					world.setBlockState(posLight, Blocks.AIR.getDefaultState());
-				}
-				posLight = BlockPos.ORIGIN;
+			if (!this.getEntityWorld().isRemote) {
+				clearCurrentLightBlock();
 			}
 		}
 
@@ -167,6 +148,17 @@ public class EntitySkyLantern extends EntityCreature {
 		}
 
 		this.fallDistance = 0;
+	}
+
+	public void clearCurrentLightBlock() {
+		if (!posLight.equals(BlockPos.ORIGIN)) {
+			IBlockState state = world.getBlockState(posLight);
+			if (state.getBlock() == CommonProxy.blockAirLit) {
+				System.out.println("set " + posLight + " to air");
+				world.setBlockState(posLight, Blocks.AIR.getDefaultState());
+			}
+			posLight = BlockPos.ORIGIN;
+		}
 	}
 
 	@Override
@@ -191,6 +183,15 @@ public class EntitySkyLantern extends EntityCreature {
 		compound.setInteger("light_Z", posLight.getZ());
 
 		compound.setInteger("color", this.getDataManager().get(COLOR));
+
+		//detect broken vanilla state and force set the leash nbt
+		if (this.getLeashed() && getLeashedToEntity() == null) {
+			NBTTagCompound tag = ReflectionHelper.getPrivateValue(EntityLiving.class, this, "field_110170_bx", "leashNBTTag");
+			if (tag != null) {
+				//System.out.println("writing leashNBTTag to disk for vanilla bug fix: " + tag);
+				compound.setTag("Leash", tag);
+			}
+		}
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -296,6 +297,22 @@ public class EntitySkyLantern extends EntityCreature {
 				this.motionY += d1 * Math.abs(d1) * 0.03D;
 				this.motionZ += d2 * Math.abs(d2) * 0.1D;
 			}
+		}
+	}
+
+	@Override
+	public void setDead() {
+		super.setDead();
+		if (!world.isRemote) {
+			clearCurrentLightBlock();
+		}
+	}
+
+	@Override
+	public void onEntityRemoved() {
+		if (!world.isRemote) {
+			//doing this in this context just glitches out lighting, it doesnt actually remove the block, and then we're not tracking it
+			//clearCurrentLightBlock();
 		}
 	}
 }
