@@ -150,7 +150,7 @@ public class EntitySkyLantern extends EntityCreature {
 		if (!posLight.equals(BlockPos.ORIGIN)) {
 			IBlockState state = world.getBlockState(posLight);
 			if (state.getBlock() == CommonProxy.blockAirLit) {
-				System.out.println("set " + posLight + " to air");
+				//System.out.println("set " + posLight + " to air");
 				world.setBlockState(posLight, Blocks.AIR.getDefaultState());
 			}
 			posLight = BlockPos.ORIGIN;

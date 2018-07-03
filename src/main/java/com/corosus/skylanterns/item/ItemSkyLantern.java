@@ -35,6 +35,7 @@ public class ItemSkyLantern extends Item {
             ItemStack stack = playerIn.getHeldItem(handIn);
             if (!stack.isEmpty()) {
                 stack.shrink(1);
+                playerIn.swingArm(handIn);
 
                 EntitySkyLantern entity = new EntitySkyLantern(worldIn);
                 entity.setPosition(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ);
